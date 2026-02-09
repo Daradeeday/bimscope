@@ -1,0 +1,23 @@
+{
+  "name": "ifc-viewer",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "postinstall": "node scripts/copy-web-ifc-wasm.js",
+    "predev": "node scripts/copy-web-ifc-wasm.js",
+    "dev": "vite",
+    "prebuild": "node scripts/copy-web-ifc-wasm.js",
+    "build": "vite build",
+    "prepreview": "node scripts/copy-web-ifc-wasm.js",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "0.149.0",
+    "web-ifc": "0.0.46",
+    "web-ifc-three": "0.0.124"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

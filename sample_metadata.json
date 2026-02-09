@@ -1,0 +1,45 @@
+{
+  "project_info": {
+    "project_name": "F18-2016-6",
+    "building_name": "Test Building"
+  },
+  "levels": [
+    { "name": "ระดับพื้นปรับระดับ", "elevation": 0.0 },
+    { "name": "ระดับพื้น+0.50", "elevation": 0.5 },
+    { "name": "พื้นชั้น1", "elevation": 1.9 },
+    { "name": "ระดับพื้นชั้น2", "elevation": 5.9 },
+    { "name": "ระดับหลังคา", "elevation": 9.9 }
+  ],
+  "rooms": [
+    {
+      "name": "Restaurant&Pantry",
+      "number": "2437",
+      "level_name": "พื้นชั้น1",
+      "location": { "x": -52.0, "y": 4.2, "z": 20.0 },
+      "bounding_box": {
+        "center": { "x": -52.0, "y": 4.2, "z": 20.0 },
+        "size": { "x": 15.0, "y": 8.0, "z": 3.0 }
+      }
+    },
+    {
+      "name": "Laser & Optical Characterization Lab",
+      "number": "743",
+      "level_name": "พื้นชั้น1",
+      "location": { "x": 1.5, "y": 1.5, "z": -33.0 },
+      "bounding_box": {
+        "center": { "x": 1.5, "y": 1.5, "z": -33.0 },
+        "size": { "x": 12.0, "y": 8.0, "z": 3.0 }
+      }
+    },
+    {
+      "name": "Office",
+      "number": "2563",
+      "level_name": "ระดับพื้นชั้น2",
+      "location": { "x": -44.0, "y": 2.0, "z": -17.0 },
+      "bounding_box": {
+        "center": { "x": -44.0, "y": 2.0, "z": -17.0 },
+        "size": { "x": 8.0, "y": 6.0, "z": 3.0 }
+      }
+    }
+  ]
+}

@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>BIMSCOPE IFC — Online IFC Viewer & Inspector</title>
+  <meta name="description" content="BIMSCOPE IFC — Free online IFC viewer and inspector. Load, inspect, and export IFC model data directly in your browser." />
+  <meta name="author" content="Punya" />
+  <meta name="copyright" content="Punya" />
+  <meta name="keywords" content="BIMSCOPE, IFC, IFC Viewer, IFC Viewer Online, IFC Inspector, BIM, Building Information Modeling, IFC Data Export" />
+  <link rel="icon" type="image/png" href="./assets/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./src/indexstyle.css">
+
+  
+  </head>
+
+<body>
+
+  <!-- ── Loading Screen ── -->
+  <div id="pageLoader" class="page-loader" aria-live="polite">
+    <div class="page-loader-inner">
+      <div class="loader-mark">
+        <img src="./assets/logo.png" alt="BIMSCOPE" />
+      </div>
+      <div class="loader-text">Loading experience...</div>
+      <div class="loader-progress"><span></span></div>
+    </div>
+  </div>
+
+  <!-- ── Language Selection Modal ── -->
+  <div id="langModal" class="lang-modal-overlay">
+    <div class="lang-modal">
+      <div class="lang-modal-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <h2>Choose Your Language</h2>
+      <p>Select the language you'd like to use on this website.</p>
+      <div class="lang-options">
+        <button class="lang-option" data-lang="en">
+          <span class="lang-option-flag">🇬🇧</span>
+          <span class="lang-option-label">English</span>
+          <span class="lang-option-sub">Continue in English</span>
+        </button>
+        <button class="lang-option" data-lang="th">
+          <span class="lang-option-flag">🇹🇭</span>
+          <span class="lang-option-label">ภาษาไทย</span>
+          <span class="lang-option-sub">ดำเนินการเป็นภาษาไทย</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ── Cookie Consent Banner ── -->
+  <div id="cookieBanner" class="cookie-banner">
+    <div class="cookie-inner">
+      <div class="cookie-text">
+        <h3 data-i18n="cookie_title">Cookie Notice</h3>
+        <p data-i18n="cookie_desc">We use cookies to save your language preference and improve your experience. No personal data is collected.</p>
+      </div>
+      <div class="cookie-actions">
+        <button id="cookieDecline" class="cookie-btn cookie-btn--decline" data-i18n="cookie_decline">Decline</button>
+        <button id="cookieAccept" class="cookie-btn cookie-btn--accept" data-i18n="cookie_accept">Accept</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ── Navbar ── -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-brand">
+        <img src="./assets/logo.png" alt="BIMSCOPE" />
+        <span>BIMSCOPE</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features" class="nav-link" data-i18n="nav_features">Features</a>
+        <a href="#why" class="nav-link" data-i18n="nav_why">Why BIMSCOPE</a>
+        <button id="langToggle" class="lang-toggle" title="Switch Language">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span id="langToggleLabel">EN</span>
+        </button>
+        <a href="./app.html" class="nav-cta" data-i18n="nav_launch">
+          Launch App
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+
+  <!-- ── Hero ── -->
+  <section class="hero reveal">
+    <div class="hero-inner">
+      <div class="hero-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>
+        <span data-i18n="hero_badge">Free &amp; Open — No Installation Required</span>
+      </div>
+      <h1 data-i18n="hero_title" data-i18n-html="true">Inspect IFC Models<br/><em>Directly in Your Browser</em></h1>
+      <p data-i18n="hero_desc">Load any .ifc file, explore building data, inspect properties, analyze rooms, and export structured data — all without leaving your browser.</p>
+      <div class="hero-actions">
+        <a href="./app.html" class="btn-hero btn-hero--primary" data-i18n="hero_cta">
+          Open IFC Viewer
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#features" class="btn-hero btn-hero--ghost" data-i18n="hero_learn">
+          Learn More
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-screenshot-placeholder">
+        <picture>
+          <source srcset="./assets/hero-screenshot.png" type="image/png">
+          <img src="./assets/hero-screenshot.png" alt="BIMSCOPE IFC Viewer Preview">
+        </picture>
+        <span data-i18n="hero_preview">BIMSCOPE IFC Viewer Preview</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── Pain / Solution / Benefit ── -->
+  <section class="section section--alt reveal" id="overview">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-label" data-i18n="overview_label">Overview</span>
+        <h2 data-i18n="overview_title">Turn Complex IFC Data into Actionable Insights</h2>
+        <p data-i18n="overview_desc">BIMSCOPE IFC was built to solve the real problems architects and engineers face when working with IFC files.</p>
+      </div>
+
+      <div class="psb-grid">
+        <div class="psb-card">
+          <div class="psb-icon psb-icon--red">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+          <h3 data-i18n="pain_title">Pain — Common Problems</h3>
+          <p data-i18n="pain_desc">Installing heavy desktop software just to view an IFC file. Switching between multiple programs. No quick way to inspect properties or export data.</p>
+        </div>
+
+        <div class="psb-card">
+          <div class="psb-icon psb-icon--blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 data-i18n="solution_title">Solution — BIMSCOPE IFC</h3>
+          <p data-i18n="solution_desc">A lightweight, browser-based IFC viewer with built-in property inspection, room analysis, section box controls, and structured data export.</p>
+        </div>
+
+        <div class="psb-card">
+          <div class="psb-icon psb-icon--green">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <h3 data-i18n="benefit_title">Benefit — Real Results</h3>
+          <p data-i18n="benefit_desc">Save hours of work. Get complete property data instantly. Export room coordinates and BOQ data in JSON or CSV — ready for your workflow.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── Features ── -->
+  <section class="section reveal" id="features">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-label" data-i18n="feat_label">Features</span>
+        <h2 data-i18n="feat_title">Everything You Need for IFC Inspection</h2>
+        <p data-i18n="feat_desc">Professional-grade tools for loading, viewing, inspecting, and exporting IFC data.</p>
+      </div>
+
+      <div class="feat-grid">
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <h3 data-i18n="feat1_title">Load IFC Files</h3>
+          <p data-i18n="feat1_desc">Drag and drop any .ifc file to load and render a full 3D model in your browser.</p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <h3 data-i18n="feat2_title">Inspect Properties</h3>
+          <p data-i18n="feat2_desc">Query entities by ExpressID. View property sets, type properties, and relationships.</p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </div>
+          <h3 data-i18n="feat3_title">Room Analysis</h3>
+          <p data-i18n="feat3_desc">Navigate to rooms, apply section boxes, and analyze IfcSpace data with coordinates.</p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+          <h3 data-i18n="feat4_title">Export Data</h3>
+          <p data-i18n="feat4_desc">Export structured room data with coordinates to JSON or CSV for downstream tools.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── Why BIMSCOPE ── -->
+  <section class="section section--alt reveal" id="why">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-label" data-i18n="why_label">Why BIMSCOPE</span>
+        <h2 data-i18n="why_title">Built for Speed and Simplicity</h2>
+        <p data-i18n="why_desc">No downloads, no accounts, no complexity. Just open and inspect.</p>
+      </div>
+
+      <div class="why-grid">
+        <div class="why-card">
+          <div class="num">100%</div>
+          <p data-i18n="stat1_desc">Browser-based<br/>No installation</p>
+        </div>
+        <div class="why-card">
+          <div class="num">IFC 2x3</div>
+          <p data-i18n="stat2_desc">Full support for<br/>industry-standard IFC</p>
+        </div>
+        <div class="why-card">
+          <div class="num">JSON / CSV</div>
+          <p data-i18n="stat3_desc">Structured data<br/>export formats</p>
+        </div>
+        <div class="why-card">
+          <div class="num" data-i18n="stat4_num">Free</div>
+          <p data-i18n="stat4_desc">Open demo<br/>no license needed</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── CTA Banner ── -->
+  <section class="cta-section reveal">
+    <div class="cta-inner">
+      <h2 data-i18n="cta_title">Ready to Inspect Your IFC?</h2>
+      <p data-i18n="cta_desc">Load your .ifc file and start exploring building data in seconds. No signup required.</p>
+      <a href="./app.html" class="btn-cta" data-i18n="cta_btn">
+        Launch BIMSCOPE IFC
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </section>
+
+
+  <!-- ── Footer ── -->
+  <footer class="footer reveal">
+    <div class="footer-top">
+      <div class="footer-inner">
+
+        <div class="footer-col footer-col--brand">
+          <a href="/" class="footer-logo">
+            <img src="./assets/logo.png" alt="BIMSCOPE" />
+            <span>BIMSCOPE</span>
+          </a>
+          <p class="footer-tagline" data-i18n="footer_tagline">Browser-based IFC viewer and inspector for architects, engineers, and BIM professionals.</p>
+          <div class="footer-social">
+            <a href="https://github.com/" target="_blank" rel="noopener" aria-label="GitHub" class="footer-social-link">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading" data-i18n="footer_h_product">Product</h4>
+          <ul class="footer-links">
+            <li><a href="./app.html" data-i18n="footer_l_viewer">IFC Viewer</a></li>
+            <li><a href="#features" data-i18n="footer_l_features">Features</a></li>
+            <li><a href="#why" data-i18n="footer_l_why">Why BIMSCOPE</a></li>
+            <li><a href="#overview" data-i18n="footer_l_overview">Overview</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading" data-i18n="footer_h_research">Research</h4>
+          <ul class="footer-links">
+            <li><a href="#" data-i18n="footer_l_why_matters">Why It Matters</a></li>
+            <li><a href="#" data-i18n="footer_l_problems">Problems in Estimation</a></li>
+            <li><a href="#" data-i18n="footer_l_challenges">Challenges &amp; Opportunities</a></li>
+            <li><a href="#" data-i18n="footer_l_revit_limits">Revit QTO Limitations</a></li>
+            <li><a href="#" data-i18n="footer_l_trad_vs_auto">Traditional vs Automated</a></li>
+            <li><a href="#" data-i18n="footer_l_comparison">Empirical Comparison</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading" data-i18n="footer_h_solution">Solution & Data</h4>
+          <ul class="footer-links">
+            <li><a href="#" data-i18n="footer_l_addin">Our Solution: Revit Add-in</a></li>
+            <li><a href="#" data-i18n="footer_l_beyond_boq">Beyond BOQ: Data &amp; Future</a></li>
+            <li><a href="#" data-i18n="footer_l_summary">Research Summary</a></li>
+            <li><a href="#" data-i18n="footer_l_appendix">Appendix &amp; References</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading" data-i18n="footer_h_support">Support</h4>
+          <ul class="footer-links">
+            <li><a href="#" data-i18n="footer_l_faq">FAQ</a></li>
+            <li><a href="#" data-i18n="footer_l_troubleshoot">Troubleshooting</a></li>
+            <li><a href="#" data-i18n="footer_l_toc">Table of Contents</a></li>
+            <li><a href="#" data-i18n="footer_l_contact">Contact Us</a></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-inner">
+        <span class="footer-copy" data-i18n="footer_copy">&copy; 2025 Punya. All rights reserved.</span>
+        <div class="footer-bottom-links">
+          <a href="#" data-i18n="footer_l_privacy">Privacy Policy</a>
+          <span class="footer-dot"></span>
+          <a href="#" data-i18n="footer_l_terms">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+
+  <script>
+  (function () {
+    'use strict';
+
+    /* ── Translation Dictionary ── */
+    var T = {
+      en: {
+        nav_features: 'Features',
+        nav_why: 'Why BIMSCOPE',
+        nav_launch: 'Launch App',
+        hero_badge: 'Free & Open — No Installation Required',
+        hero_title: 'Inspect IFC Models<br/><em>Directly in Your Browser</em>',
+        hero_desc: 'Load any .ifc file, explore building data, inspect properties, analyze rooms, and export structured data — all without leaving your browser.',
+        hero_cta: 'Open IFC Viewer',
+        hero_learn: 'Learn More',
+        hero_preview: 'BIMSCOPE IFC Viewer Preview',
+        overview_label: 'Overview',
+        overview_title: 'Turn Complex IFC Data into Actionable Insights',
+        overview_desc: 'BIMSCOPE IFC was built to solve the real problems architects and engineers face when working with IFC files.',
+        pain_title: 'Pain — Common Problems',
+        pain_desc: 'Installing heavy desktop software just to view an IFC file. Switching between multiple programs. No quick way to inspect properties or export data.',
+        solution_title: 'Solution — BIMSCOPE IFC',
+        solution_desc: 'A lightweight, browser-based IFC viewer with built-in property inspection, room analysis, section box controls, and structured data export.',
+        benefit_title: 'Benefit — Real Results',
+        benefit_desc: 'Save hours of work. Get complete property data instantly. Export room coordinates and BOQ data in JSON or CSV — ready for your workflow.',
+        feat_label: 'Features',
+        feat_title: 'Everything You Need for IFC Inspection',
+        feat_desc: 'Professional-grade tools for loading, viewing, inspecting, and exporting IFC data.',
+        feat1_title: 'Load IFC Files',
+        feat1_desc: 'Drag and drop any .ifc file to load and render a full 3D model in your browser.',
+        feat2_title: 'Inspect Properties',
+        feat2_desc: 'Query entities by ExpressID. View property sets, type properties, and relationships.',
+        feat3_title: 'Room Analysis',
+        feat3_desc: 'Navigate to rooms, apply section boxes, and analyze IfcSpace data with coordinates.',
+        feat4_title: 'Export Data',
+        feat4_desc: 'Export structured room data with coordinates to JSON or CSV for downstream tools.',
+        why_label: 'Why BIMSCOPE',
+        why_title: 'Built for Speed and Simplicity',
+        why_desc: 'No downloads, no accounts, no complexity. Just open and inspect.',
+        stat1_desc: 'Browser-based<br/>No installation',
+        stat2_desc: 'Full support for<br/>industry-standard IFC',
+        stat3_desc: 'Structured data<br/>export formats',
+        stat4_num: 'Free',
+        stat4_desc: 'Open demo<br/>no license needed',
+        cta_title: 'Ready to Inspect Your IFC?',
+        cta_desc: 'Load your .ifc file and start exploring building data in seconds. No signup required.',
+        cta_btn: 'Launch BIMSCOPE IFC',
+        footer_tagline: 'Browser-based IFC viewer and inspector for architects, engineers, and BIM professionals.',
+        footer_h_product: 'Product',
+        footer_h_research: 'Research',
+        footer_h_solution: 'Solution & Data',
+        footer_h_support: 'Support',
+        footer_l_viewer: 'IFC Viewer',
+        footer_l_features: 'Features',
+        footer_l_why: 'Why BIMSCOPE',
+        footer_l_overview: 'Overview',
+        footer_l_why_matters: 'Why It Matters',
+        footer_l_problems: 'Problems in Estimation',
+        footer_l_challenges: 'Challenges & Opportunities',
+        footer_l_revit_limits: 'Revit QTO Limitations',
+        footer_l_trad_vs_auto: 'Traditional vs Automated',
+        footer_l_comparison: 'Empirical Comparison',
+        footer_l_addin: 'Our Solution: Revit Add-in',
+        footer_l_beyond_boq: 'Beyond BOQ: Data & Future',
+        footer_l_summary: 'Research Summary',
+        footer_l_appendix: 'Appendix & References',
+        footer_l_faq: 'FAQ',
+        footer_l_troubleshoot: 'Troubleshooting',
+        footer_l_toc: 'Table of Contents',
+        footer_l_contact: 'Contact Us',
+        footer_l_privacy: 'Privacy Policy',
+        footer_l_terms: 'Terms of Service',
+        footer_copy: '\u00a9 2025 Punya. All rights reserved.',
+        cookie_title: 'Cookie Notice',
+        cookie_desc: 'We use cookies to save your language preference and improve your experience. No personal data is collected.',
+        cookie_accept: 'Accept',
+        cookie_decline: 'Decline'
+      },
+      th: {
+        nav_features: '\u0e1f\u0e35\u0e40\u0e08\u0e2d\u0e23\u0e4c',
+        nav_why: '\u0e17\u0e33\u0e44\u0e21\u0e15\u0e49\u0e2d\u0e07 BIMSCOPE',
+        nav_launch: '\u0e40\u0e1b\u0e34\u0e14\u0e41\u0e2d\u0e1b',
+        hero_badge: '\u0e1f\u0e23\u0e35\u0e41\u0e25\u0e30\u0e40\u0e1b\u0e34\u0e14\u0e01\u0e27\u0e49\u0e32\u0e07 \u2014 \u0e44\u0e21\u0e48\u0e15\u0e49\u0e2d\u0e07\u0e15\u0e34\u0e14\u0e15\u0e31\u0e49\u0e07',
+        hero_title: '\u0e15\u0e23\u0e27\u0e08\u0e2a\u0e2d\u0e1a\u0e42\u0e21\u0e40\u0e14\u0e25 IFC<br/><em>\u0e44\u0e14\u0e49\u0e17\u0e31\u0e19\u0e17\u0e35\u0e43\u0e19\u0e40\u0e1a\u0e23\u0e32\u0e27\u0e4c\u0e40\u0e0b\u0e2d\u0e23\u0e4c</em>',
+        hero_desc: '\u0e42\u0e2b\u0e25\u0e14\u0e44\u0e1f\u0e25\u0e4c .ifc \u0e2a\u0e33\u0e23\u0e27\u0e08\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e2d\u0e32\u0e04\u0e32\u0e23 \u0e15\u0e23\u0e27\u0e08\u0e2a\u0e2d\u0e1a\u0e04\u0e38\u0e13\u0e2a\u0e21\u0e1a\u0e31\u0e15\u0e34 \u0e27\u0e34\u0e40\u0e04\u0e23\u0e32\u0e30\u0e2b\u0e4c\u0e2b\u0e49\u0e2d\u0e07 \u0e41\u0e25\u0e30\u0e2a\u0e48\u0e07\u0e2d\u0e2d\u0e01\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25 \u2014 \u0e17\u0e31\u0e49\u0e07\u0e2b\u0e21\u0e14\u0e1c\u0e48\u0e32\u0e19\u0e40\u0e1a\u0e23\u0e32\u0e27\u0e4c\u0e40\u0e0b\u0e2d\u0e23\u0e4c',
+        hero_cta: '\u0e40\u0e1b\u0e34\u0e14 IFC Viewer',
+        hero_learn: '\u0e14\u0e39\u0e40\u0e1e\u0e34\u0e48\u0e21\u0e40\u0e15\u0e34\u0e21',
+        hero_preview: '\u0e15\u0e31\u0e27\u0e2d\u0e22\u0e48\u0e32\u0e07 BIMSCOPE IFC Viewer',
+        overview_label: '\u0e20\u0e32\u0e1e\u0e23\u0e27\u0e21',
+        overview_title: '\u0e40\u0e1b\u0e25\u0e35\u0e48\u0e22\u0e19\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25 IFC \u0e17\u0e35\u0e48\u0e0b\u0e31\u0e1a\u0e0b\u0e49\u0e2d\u0e19\u0e40\u0e1b\u0e47\u0e19\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e40\u0e0a\u0e34\u0e07\u0e25\u0e36\u0e01',
+        overview_desc: 'BIMSCOPE IFC \u0e2a\u0e23\u0e49\u0e32\u0e07\u0e02\u0e36\u0e49\u0e19\u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32\u0e17\u0e35\u0e48\u0e2a\u0e16\u0e32\u0e1b\u0e19\u0e34\u0e01\u0e41\u0e25\u0e30\u0e27\u0e34\u0e28\u0e27\u0e01\u0e23\u0e1e\u0e1a\u0e40\u0e21\u0e37\u0e48\u0e2d\u0e17\u0e33\u0e07\u0e32\u0e19\u0e01\u0e31\u0e1a\u0e44\u0e1f\u0e25\u0e4c IFC',
+        pain_title: '\u0e1b\u0e31\u0e0d\u0e2b\u0e32 \u2014 \u0e2a\u0e34\u0e48\u0e07\u0e17\u0e35\u0e48\u0e1e\u0e1a\u0e1a\u0e48\u0e2d\u0e22',
+        pain_desc: '\u0e15\u0e49\u0e2d\u0e07\u0e15\u0e34\u0e14\u0e15\u0e31\u0e49\u0e07\u0e0b\u0e2d\u0e1f\u0e15\u0e4c\u0e41\u0e27\u0e23\u0e4c\u0e2b\u0e19\u0e31\u0e01\u0e40\u0e1e\u0e35\u0e22\u0e07\u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e40\u0e1b\u0e34\u0e14\u0e14\u0e39\u0e44\u0e1f\u0e25\u0e4c IFC \u0e2a\u0e25\u0e31\u0e1a\u0e42\u0e1b\u0e23\u0e41\u0e01\u0e23\u0e21\u0e2b\u0e25\u0e32\u0e22\u0e15\u0e31\u0e27 \u0e44\u0e21\u0e48\u0e21\u0e35\u0e27\u0e34\u0e18\u0e35\u0e15\u0e23\u0e27\u0e08\u0e2a\u0e2d\u0e1a\u0e2b\u0e23\u0e37\u0e2d\u0e2a\u0e48\u0e07\u0e2d\u0e2d\u0e01\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e44\u0e14\u0e49\u0e40\u0e23\u0e47\u0e27',
+        solution_title: '\u0e17\u0e32\u0e07\u0e2d\u0e2d\u0e01 \u2014 BIMSCOPE IFC',
+        solution_desc: 'IFC Viewer \u0e1a\u0e19\u0e40\u0e1a\u0e23\u0e32\u0e27\u0e4c\u0e40\u0e0b\u0e2d\u0e23\u0e4c\u0e17\u0e35\u0e48\u0e40\u0e1a\u0e32\u0e41\u0e25\u0e30\u0e23\u0e27\u0e14\u0e40\u0e23\u0e47\u0e27 \u0e1e\u0e23\u0e49\u0e2d\u0e21\u0e23\u0e30\u0e1a\u0e1a\u0e15\u0e23\u0e27\u0e08\u0e2a\u0e2d\u0e1a\u0e04\u0e38\u0e13\u0e2a\u0e21\u0e1a\u0e31\u0e15\u0e34 \u0e27\u0e34\u0e40\u0e04\u0e23\u0e32\u0e30\u0e2b\u0e4c\u0e2b\u0e49\u0e2d\u0e07 Section Box \u0e41\u0e25\u0e30\u0e2a\u0e48\u0e07\u0e2d\u0e2d\u0e01\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25',
+        benefit_title: '\u0e1c\u0e25\u0e25\u0e31\u0e1e\u0e18\u0e4c \u2014 \u0e1b\u0e23\u0e30\u0e42\u0e22\u0e0a\u0e19\u0e4c\u0e17\u0e35\u0e48\u0e44\u0e14\u0e49\u0e08\u0e23\u0e34\u0e07',
+        benefit_desc: '\u0e1b\u0e23\u0e30\u0e2b\u0e22\u0e31\u0e14\u0e40\u0e27\u0e25\u0e32\u0e17\u0e33\u0e07\u0e32\u0e19 \u0e44\u0e14\u0e49\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e04\u0e38\u0e13\u0e2a\u0e21\u0e1a\u0e31\u0e15\u0e34\u0e04\u0e23\u0e1a\u0e16\u0e49\u0e27\u0e19\u0e17\u0e31\u0e19\u0e17\u0e35 \u0e2a\u0e48\u0e07\u0e2d\u0e2d\u0e01\u0e1e\u0e34\u0e01\u0e31\u0e14\u0e2b\u0e49\u0e2d\u0e07\u0e41\u0e25\u0e30 BOQ \u0e40\u0e1b\u0e47\u0e19 JSON \u0e2b\u0e23\u0e37\u0e2d CSV \u0e1e\u0e23\u0e49\u0e2d\u0e21\u0e43\u0e0a\u0e49\u0e07\u0e32\u0e19\u0e15\u0e48\u0e2d\u0e44\u0e14\u0e49\u0e17\u0e31\u0e19\u0e17\u0e35',
+        feat_label: '\u0e1f\u0e35\u0e40\u0e08\u0e2d\u0e23\u0e4c',
+        feat_title: '\u0e04\u0e23\u0e1a\u0e17\u0e38\u0e01\u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e21\u0e37\u0e2d\u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e01\u0e32\u0e23\u0e15\u0e23\u0e27\u0e08\u0e2a\u0e2d\u0e1a IFC',
+        feat_desc: '\u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e21\u0e37\u0e2d\u0e23\u0e30\u0e14\u0e31\u0e1a\u0e21\u0e37\u0e2d\u0e2d\u0e32\u0e0a\u0e35\u0e1e\u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e01\u0e32\u0e23\u0e42\u0e2b\u0e25\u0e14 \u0e14\u0e39 \u0e15\u0e23\u0e27\u0e08\u0e2a\u0e2d\u0e1a \u0e41\u0e25\u0e30\u0e2a\u0e48\u0e07\u0e2d\u0e2d\u0e01\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25 IFC',
+        feat1_title: '\u0e42\u0e2b\u0e25\u0e14\u0e44\u0e1f\u0e25\u0e4c IFC',
+        feat1_desc: '\u0e25\u0e32\u0e01\u0e27\u0e32\u0e07\u0e44\u0e1f\u0e25\u0e4c .ifc \u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e42\u0e2b\u0e25\u0e14\u0e41\u0e25\u0e30\u0e41\u0e2a\u0e14\u0e07\u0e1c\u0e25\u0e42\u0e21\u0e40\u0e14\u0e25 3D \u0e43\u0e19\u0e40\u0e1a\u0e23\u0e32\u0e27\u0e4c\u0e40\u0e0b\u0e2d\u0e23\u0e4c',
+        feat2_title: '\u0e15\u0e23\u0e27\u0e08\u0e2a\u0e2d\u0e1a\u0e04\u0e38\u0e13\u0e2a\u0e21\u0e1a\u0e31\u0e15\u0e34',
+        feat2_desc: '\u0e04\u0e49\u0e19\u0e2b\u0e32\u0e40\u0e2d\u0e19\u0e17\u0e34\u0e15\u0e35\u0e49\u0e14\u0e49\u0e27\u0e22 ExpressID \u0e14\u0e39 Property Sets, Type Properties \u0e41\u0e25\u0e30\u0e04\u0e27\u0e32\u0e21\u0e2a\u0e31\u0e21\u0e1e\u0e31\u0e19\u0e18\u0e4c',
+        feat3_title: '\u0e27\u0e34\u0e40\u0e04\u0e23\u0e32\u0e30\u0e2b\u0e4c\u0e2b\u0e49\u0e2d\u0e07',
+        feat3_desc: '\u0e19\u0e33\u0e17\u0e32\u0e07\u0e44\u0e1b\u0e22\u0e31\u0e07\u0e2b\u0e49\u0e2d\u0e07 \u0e43\u0e0a\u0e49 Section Box \u0e41\u0e25\u0e30\u0e27\u0e34\u0e40\u0e04\u0e23\u0e32\u0e30\u0e2b\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25 IfcSpace \u0e1e\u0e23\u0e49\u0e2d\u0e21\u0e1e\u0e34\u0e01\u0e31\u0e14',
+        feat4_title: '\u0e2a\u0e48\u0e07\u0e2d\u0e2d\u0e01\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25',
+        feat4_desc: '\u0e2a\u0e48\u0e07\u0e2d\u0e2d\u0e01\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e2b\u0e49\u0e2d\u0e07\u0e1e\u0e23\u0e49\u0e2d\u0e21\u0e1e\u0e34\u0e01\u0e31\u0e14\u0e40\u0e1b\u0e47\u0e19 JSON \u0e2b\u0e23\u0e37\u0e2d CSV \u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e43\u0e0a\u0e49\u0e07\u0e32\u0e19\u0e15\u0e48\u0e2d\u0e44\u0e14\u0e49',
+        why_label: '\u0e17\u0e33\u0e44\u0e21\u0e15\u0e49\u0e2d\u0e07 BIMSCOPE',
+        why_title: '\u0e2a\u0e23\u0e49\u0e32\u0e07\u0e21\u0e32\u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e04\u0e27\u0e32\u0e21\u0e40\u0e23\u0e47\u0e27\u0e41\u0e25\u0e30\u0e04\u0e27\u0e32\u0e21\u0e40\u0e23\u0e35\u0e22\u0e1a\u0e07\u0e48\u0e32\u0e22',
+        why_desc: '\u0e44\u0e21\u0e48\u0e15\u0e49\u0e2d\u0e07\u0e14\u0e32\u0e27\u0e19\u0e4c\u0e42\u0e2b\u0e25\u0e14 \u0e44\u0e21\u0e48\u0e15\u0e49\u0e2d\u0e07\u0e2a\u0e21\u0e31\u0e04\u0e23 \u0e44\u0e21\u0e48\u0e22\u0e38\u0e48\u0e07\u0e22\u0e32\u0e01 \u0e41\u0e04\u0e48\u0e40\u0e1b\u0e34\u0e14\u0e41\u0e25\u0e49\u0e27\u0e43\u0e0a\u0e49\u0e07\u0e32\u0e19',
+        stat1_desc: '\u0e43\u0e0a\u0e49\u0e07\u0e32\u0e19\u0e1c\u0e48\u0e32\u0e19\u0e40\u0e1a\u0e23\u0e32\u0e27\u0e4c\u0e40\u0e0b\u0e2d\u0e23\u0e4c<br/>\u0e44\u0e21\u0e48\u0e15\u0e49\u0e2d\u0e07\u0e15\u0e34\u0e14\u0e15\u0e31\u0e49\u0e07',
+        stat2_desc: '\u0e23\u0e2d\u0e07\u0e23\u0e31\u0e1a\u0e21\u0e32\u0e15\u0e23\u0e10\u0e32\u0e19<br/>IFC \u0e2d\u0e38\u0e15\u0e2a\u0e32\u0e2b\u0e01\u0e23\u0e23\u0e21',
+        stat3_desc: '\u0e2a\u0e48\u0e07\u0e2d\u0e2d\u0e01\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25<br/>\u0e23\u0e39\u0e1b\u0e41\u0e1a\u0e1a\u0e21\u0e35\u0e42\u0e04\u0e23\u0e07\u0e2a\u0e23\u0e49\u0e32\u0e07',
+        stat4_num: '\u0e1f\u0e23\u0e35',
+        stat4_desc: '\u0e40\u0e14\u0e42\u0e21\u0e40\u0e1b\u0e34\u0e14\u0e43\u0e0a\u0e49\u0e07\u0e32\u0e19<br/>\u0e44\u0e21\u0e48\u0e15\u0e49\u0e2d\u0e07\u0e21\u0e35\u0e44\u0e25\u0e40\u0e0b\u0e19\u0e2a\u0e4c',
+        cta_title: '\u0e1e\u0e23\u0e49\u0e2d\u0e21\u0e15\u0e23\u0e27\u0e08\u0e2a\u0e2d\u0e1a IFC \u0e02\u0e2d\u0e07\u0e04\u0e38\u0e13\u0e41\u0e25\u0e49\u0e27\u0e2b\u0e23\u0e37\u0e2d\u0e22\u0e31\u0e07?',
+        cta_desc: '\u0e42\u0e2b\u0e25\u0e14\u0e44\u0e1f\u0e25\u0e4c .ifc \u0e41\u0e25\u0e30\u0e40\u0e23\u0e34\u0e48\u0e21\u0e2a\u0e33\u0e23\u0e27\u0e08\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e2d\u0e32\u0e04\u0e32\u0e23\u0e44\u0e14\u0e49\u0e43\u0e19\u0e44\u0e21\u0e48\u0e01\u0e35\u0e48\u0e27\u0e34\u0e19\u0e32\u0e17\u0e35 \u0e44\u0e21\u0e48\u0e15\u0e49\u0e2d\u0e07\u0e2a\u0e21\u0e31\u0e04\u0e23',
+        cta_btn: '\u0e40\u0e1b\u0e34\u0e14 BIMSCOPE IFC',
+        footer_tagline: '\u0e42\u0e1b\u0e23\u0e41\u0e01\u0e23\u0e21\u0e14\u0e39\u0e44\u0e1f\u0e25\u0e4c IFC \u0e1a\u0e19\u0e40\u0e1a\u0e23\u0e32\u0e27\u0e4c\u0e40\u0e0b\u0e2d\u0e23\u0e4c \u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e2a\u0e16\u0e32\u0e1b\u0e19\u0e34\u0e01 \u0e27\u0e34\u0e28\u0e27\u0e01\u0e23 \u0e41\u0e25\u0e30\u0e1c\u0e39\u0e49\u0e40\u0e0a\u0e35\u0e48\u0e22\u0e27\u0e0a\u0e32\u0e0d\u0e14\u0e49\u0e32\u0e19 BIM',
+        footer_h_product: '\u0e1c\u0e25\u0e34\u0e15\u0e20\u0e31\u0e13\u0e11\u0e4c',
+        footer_h_research: '\u0e07\u0e32\u0e19\u0e27\u0e34\u0e08\u0e31\u0e22',
+        footer_h_solution: '\u0e42\u0e0b\u0e25\u0e39\u0e0a\u0e31\u0e19\u0e41\u0e25\u0e30\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25',
+        footer_h_support: '\u0e2a\u0e19\u0e31\u0e1a\u0e2a\u0e19\u0e38\u0e19',
+        footer_l_viewer: '\u0e42\u0e1b\u0e23\u0e41\u0e01\u0e23\u0e21\u0e14\u0e39 IFC',
+        footer_l_features: '\u0e1f\u0e35\u0e40\u0e08\u0e2d\u0e23\u0e4c',
+        footer_l_why: '\u0e17\u0e33\u0e44\u0e21\u0e15\u0e49\u0e2d\u0e07 BIMSCOPE',
+        footer_l_overview: '\u0e20\u0e32\u0e1e\u0e23\u0e27\u0e21',
+        footer_l_why_matters: '\u0e17\u0e33\u0e44\u0e21\u0e16\u0e36\u0e07\u0e2a\u0e33\u0e04\u0e31\u0e0d',
+        footer_l_problems: '\u0e1b\u0e31\u0e0d\u0e2b\u0e32\u0e43\u0e19\u0e01\u0e32\u0e23\u0e1b\u0e23\u0e30\u0e21\u0e32\u0e13\u0e23\u0e32\u0e04\u0e32',
+        footer_l_challenges: '\u0e04\u0e27\u0e32\u0e21\u0e17\u0e49\u0e32\u0e17\u0e32\u0e22\u0e41\u0e25\u0e30\u0e42\u0e2d\u0e01\u0e32\u0e2a',
+        footer_l_revit_limits: '\u0e02\u0e49\u0e2d\u0e08\u0e33\u0e01\u0e31\u0e14 Revit QTO',
+        footer_l_trad_vs_auto: '\u0e27\u0e34\u0e18\u0e35\u0e14\u0e31\u0e49\u0e07\u0e40\u0e14\u0e34\u0e21 vs \u0e2d\u0e31\u0e15\u0e42\u0e19\u0e21\u0e31\u0e15\u0e34',
+        footer_l_comparison: '\u0e01\u0e32\u0e23\u0e40\u0e1b\u0e23\u0e35\u0e22\u0e1a\u0e40\u0e17\u0e35\u0e22\u0e1a\u0e40\u0e0a\u0e34\u0e07\u0e1b\u0e23\u0e30\u0e08\u0e31\u0e01\u0e29\u0e4c',
+        footer_l_addin: '\u0e42\u0e0b\u0e25\u0e39\u0e0a\u0e31\u0e19: Revit Add-in',
+        footer_l_beyond_boq: '\u0e21\u0e32\u0e01\u0e01\u0e27\u0e48\u0e32 BOQ: \u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e41\u0e25\u0e30\u0e2d\u0e19\u0e32\u0e04\u0e15',
+        footer_l_summary: '\u0e2a\u0e23\u0e38\u0e1b\u0e07\u0e32\u0e19\u0e27\u0e34\u0e08\u0e31\u0e22',
+        footer_l_appendix: '\u0e20\u0e32\u0e04\u0e1c\u0e19\u0e27\u0e01\u0e41\u0e25\u0e30\u0e40\u0e2d\u0e01\u0e2a\u0e32\u0e23\u0e2d\u0e49\u0e32\u0e07\u0e2d\u0e34\u0e07',
+        footer_l_faq: '\u0e04\u0e33\u0e16\u0e32\u0e21\u0e17\u0e35\u0e48\u0e1e\u0e1a\u0e1a\u0e48\u0e2d\u0e22',
+        footer_l_troubleshoot: '\u0e41\u0e01\u0e49\u0e44\u0e02\u0e1b\u0e31\u0e0d\u0e2b\u0e32',
+        footer_l_toc: '\u0e2a\u0e32\u0e23\u0e1a\u0e31\u0e0d',
+        footer_l_contact: '\u0e15\u0e34\u0e14\u0e15\u0e48\u0e2d\u0e40\u0e23\u0e32',
+        footer_l_privacy: '\u0e19\u0e42\u0e22\u0e1a\u0e32\u0e22\u0e04\u0e27\u0e32\u0e21\u0e40\u0e1b\u0e47\u0e19\u0e2a\u0e48\u0e27\u0e19\u0e15\u0e31\u0e27',
+        footer_l_terms: '\u0e02\u0e49\u0e2d\u0e01\u0e33\u0e2b\u0e19\u0e14\u0e01\u0e32\u0e23\u0e43\u0e0a\u0e49\u0e07\u0e32\u0e19',
+        footer_copy: '\u00a9 2025 Punya \u0e2a\u0e07\u0e27\u0e19\u0e25\u0e34\u0e02\u0e2a\u0e34\u0e17\u0e18\u0e34\u0e4c',
+        cookie_title: '\u0e41\u0e08\u0e49\u0e07\u0e40\u0e15\u0e37\u0e2d\u0e19\u0e04\u0e38\u0e01\u0e01\u0e35\u0e49',
+        cookie_desc: '\u0e40\u0e23\u0e32\u0e43\u0e0a\u0e49\u0e04\u0e38\u0e01\u0e01\u0e35\u0e49\u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e01\u0e32\u0e23\u0e15\u0e31\u0e49\u0e07\u0e04\u0e48\u0e32\u0e20\u0e32\u0e29\u0e32\u0e41\u0e25\u0e30\u0e1b\u0e23\u0e31\u0e1a\u0e1b\u0e23\u0e38\u0e07\u0e1b\u0e23\u0e30\u0e2a\u0e1a\u0e01\u0e32\u0e23\u0e13\u0e4c\u0e02\u0e2d\u0e07\u0e04\u0e38\u0e13 \u0e44\u0e21\u0e48\u0e21\u0e35\u0e01\u0e32\u0e23\u0e40\u0e01\u0e47\u0e1a\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e2a\u0e48\u0e27\u0e19\u0e1a\u0e38\u0e04\u0e04\u0e25',
+        cookie_accept: '\u0e22\u0e2d\u0e21\u0e23\u0e31\u0e1a',
+        cookie_decline: '\u0e1b\u0e0f\u0e34\u0e40\u0e2a\u0e18'
+      }
+    };
+
+
+    /* ── Cookie Helpers ── */
+    function setCookie(name, value, days) {
+      var d = new Date();
+      d.setTime(d.getTime() + days * 86400000);
+      document.cookie = name + '=' + encodeURIComponent(value) +
+        ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+    }
+
+    function getCookie(name) {
+      var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? decodeURIComponent(match[2]) : null;
+    }
+
+
+    /* ── Language Engine ── */
+    var currentLang = 'en';
+
+    function applyLang(lang) {
+      currentLang = lang;
+      document.documentElement.lang = lang;
+      localStorage.setItem('ifc-inspector-language', lang);
+
+      // Update toggle label
+      var label = document.getElementById('langToggleLabel');
+      if (label) label.textContent = lang === 'en' ? 'EN' : 'TH';
+
+      // Update all [data-i18n] elements
+      var dict = T[lang] || T.en;
+      document.querySelectorAll('[data-i18n]').forEach(function (el) {
+        var key = el.getAttribute('data-i18n');
+        if (!dict[key]) return;
+
+        if (el.getAttribute('data-i18n-html') === 'true') {
+          el.innerHTML = dict[key];
+        } else if (el.tagName === 'INPUT') {
+          el.placeholder = dict[key];
+        } else {
+          // Preserve child SVGs: only replace text nodes
+          var svg = el.querySelector('svg');
+          if (svg) {
+            // Remove all non-SVG children then re-add text + SVG
+            var text = dict[key];
+            el.textContent = '';
+            el.appendChild(document.createTextNode(text + ' '));
+            el.appendChild(svg);
+          } else {
+            el.innerHTML = dict[key];
+          }
+        }
+      });
+    }
+
+    function toggleLang() {
+      applyLang(currentLang === 'en' ? 'th' : 'en');
+    }
+
+
+    /* ── Language Modal ── */
+    var modal = document.getElementById('langModal');
+
+    function openModal() {
+      if (modal) modal.classList.add('is-open');
+    }
+
+    function closeModal() {
+      if (modal) modal.classList.remove('is-open');
+    }
+
+    // Modal option buttons
+    document.querySelectorAll('.lang-option').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var lang = this.getAttribute('data-lang');
+        applyLang(lang);
+        closeModal();
+        showCookieBanner();
+      });
+    });
+
+    // Close modal on overlay click
+    if (modal) {
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+          closeModal();
+          showCookieBanner();
+        }
+      });
+    }
+
+
+    /* ── Cookie Consent Banner ── */
+    var cookieBanner = document.getElementById('cookieBanner');
+
+    function showCookieBanner() {
+      if (getCookie('bimscope_cookie_consent')) return;
+      setTimeout(function () {
+        if (cookieBanner) cookieBanner.classList.add('is-visible');
+      }, 400);
+    }
+
+    function hideCookieBanner() {
+      if (cookieBanner) cookieBanner.classList.remove('is-visible');
+    }
+
+    document.getElementById('cookieAccept').addEventListener('click', function () {
+      setCookie('bimscope_cookie_consent', 'accepted', 365);
+      setCookie('bimscope_language', currentLang, 365);
+      hideCookieBanner();
+    });
+
+    document.getElementById('cookieDecline').addEventListener('click', function () {
+      setCookie('bimscope_cookie_consent', 'declined', 30);
+      hideCookieBanner();
+    });
+
+
+    /* ── Language Toggle Button ── */
+    document.getElementById('langToggle').addEventListener('click', toggleLang);
+
+
+    /* ── Init ── */
+    (function init() {
+      // Priority: localStorage > cookie > browser detect
+      var saved = localStorage.getItem('ifc-inspector-language');
+      if (!saved) saved = getCookie('bimscope_language');
+      var consent = getCookie('bimscope_cookie_consent');
+
+      if (saved && (saved === 'en' || saved === 'th')) {
+        applyLang(saved);
+        if (!consent) showCookieBanner();
+      } else {
+        // First visit — show language modal
+        openModal();
+      }
+    })();
+
+    /* ── Loading Screen ── */
+    var loader = document.getElementById('pageLoader');
+    if (loader) {
+      window.addEventListener('load', function () {
+        loader.classList.add('is-hidden');
+        setTimeout(function () {
+          loader.remove();
+        }, 650);
+      });
+    }
+
+    /* ── Reveal on Scroll ── */
+    var revealEls = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.2 });
+      revealEls.forEach(function (el) { observer.observe(el); });
+    } else {
+      revealEls.forEach(function (el) { el.classList.add('is-visible'); });
+    }
+  })();
+  </script>
+
+</body>
+
+</html>
