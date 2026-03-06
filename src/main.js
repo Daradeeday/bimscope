@@ -1,6 +1,7 @@
 import './style.css';
 import * as THREE from 'three';
-import { IFCSPACE, IFCBUILDINGSTOREY } from 'web-ifc';
+import { IFCSPACE, IFCBUILDINGSTOREY, IFCELEMENT } from 'web-ifc';
+import { initAuthGuard } from './auth-guard.js';
 import { initializeLanguage, setLanguage, getCurrentLanguage } from './i18n.js';
 import { openTour } from './tour.js';
 
@@ -45,15 +46,321 @@ import { updateSectionBoxFromStorey, populateStoreysDropdown } from './section/s
 import { focusRoomByExpressId, clearRoomFocus, populateSpacesDropdown } from './room/room-focus.js';
 import { exportRoomJSON, exportRoomCSV } from './room/room-export.js';
 
+// ── Category Visibility ─────────────────────────────────────────────
+import { discoverCategories, populateCategoryUI, clearCategoryUI, showAllCategories, hideAllCategories } from './ifc/category-visibility.js';
+
 // ── Interaction ─────────────────────────────────────────────────────
 import { highlightExpressId, onDoubleClick } from './interaction/highlight.js';
 import { initSplitter } from './interaction/splitter.js';
+
+// ── Auth Guard ───────────────────────────────────────────────────────
+initAuthGuard();
 
 // ── Register section callbacks (avoids circular imports) ────────────
 registerSectionCallbacks(updateSectionBoxFromRoom, updateSectionBoxFromStorey);
 
 // ── Splitter ────────────────────────────────────────────────────────
 initSplitter();
+resetSummaryPanel();
+
+function formatNumber(value, digits = 2) {
+  if (!Number.isFinite(value)) return 'n/a';
+  return value.toLocaleString(undefined, { maximumFractionDigits: digits });
+}
+
+function renderSummaryPanel(summary) {
+  if (!dom.summaryPanel) return;
+  const title = dom.summaryPanel.querySelector('.summary-title');
+  const subtitle = dom.summaryPanel.querySelector('.summary-subtitle');
+  const grid = dom.summaryPanel.querySelector('.summary-grid');
+  if (!grid) return;
+
+  if (title) title.textContent = 'Model Summary';
+  if (subtitle) subtitle.textContent = summary?.subtitle || 'Summary from IFC data.';
+  grid.innerHTML = '';
+
+  const items = summary?.items || [];
+  for (const item of items) {
+    const card = document.createElement('div');
+    card.className = 'summary-card';
+    const label = document.createElement('div');
+    label.className = 'summary-label';
+    label.textContent = item.label;
+    const value = document.createElement('div');
+    value.className = 'summary-value';
+    value.textContent = item.value;
+    card.append(label, value);
+    if (item.note) {
+      const note = document.createElement('div');
+      note.className = 'summary-note';
+      note.textContent = item.note;
+      card.appendChild(note);
+    }
+    grid.appendChild(card);
+  }
+}
+
+function resetSummaryPanel() {
+  renderSummaryPanel({
+    subtitle: 'Load an IFC file to see totals.',
+    items: [
+      { label: 'Storeys', value: '—' },
+      { label: 'Elements', value: '—' },
+      { label: 'Total Volume (m³)', value: '—' },
+      { label: 'Total Area (m²)', value: '—' },
+      { label: 'Top Material', value: '—', note: 'Based on material assignments in IFC.' }
+    ]
+  });
+}
+
+// function resetFloorPanel() {
+//   if (!dom.floorPanel) return;
+//   const title = dom.floorPanel.querySelector('.floor-title');
+//   const subtitle = dom.floorPanel.querySelector('.floor-subtitle');
+//   const tbody = dom.floorPanel.querySelector('.floor-table tbody');
+//   const comparisonContent = dom.floorPanel.querySelector('.comparison-content');
+//   const chartBars = dom.floorPanel.querySelector('.chart-bars');
+//   const heatmapGrid = dom.floorPanel.querySelector('.heatmap-grid');
+
+//   if (title) title.textContent = 'Floor Insights';
+//   if (subtitle) subtitle.textContent = 'Load an IFC file to see per-floor analysis.';
+//   if (tbody) tbody.innerHTML = '';
+//   if (comparisonContent) comparisonContent.innerHTML = '';
+//   if (chartBars) chartBars.innerHTML = '';
+//   if (heatmapGrid) heatmapGrid.innerHTML = '';
+// }
+
+// function renderFloorPanel(floorRows) {
+//   if (!dom.floorPanel || !floorRows || !floorRows.length) return;
+
+//   const title = dom.floorPanel.querySelector('.floor-title');
+//   const subtitle = dom.floorPanel.querySelector('.floor-subtitle');
+//   const tbody = dom.floorPanel.querySelector('.floor-table tbody');
+//   const comparisonContent = dom.floorPanel.querySelector('.comparison-content');
+//   const chartBars = dom.floorPanel.querySelector('.chart-bars');
+//   const heatmapGrid = dom.floorPanel.querySelector('.heatmap-grid');
+
+//   if (title) title.textContent = 'Floor Insights';
+//   if (subtitle) subtitle.textContent = `Analysis of ${floorRows.length} floors.`;
+
+//   // Clear previous content
+//   if (tbody) tbody.innerHTML = '';
+//   if (chartBars) chartBars.innerHTML = '';
+//   if (heatmapGrid) heatmapGrid.innerHTML = '';
+
+//   // Render table
+//   if (tbody) {
+//     floorRows.forEach(row => {
+//       const tr = document.createElement('tr');
+//       tr.innerHTML = `
+//         <td>${row.name}</td>
+//         <td>${formatNumber(row.volume, 2)}</td>
+//         <td>${formatNumber(row.area, 2)}</td>
+//         <td>${row.walls}</td>
+//         <td>${row.doors}</td>
+//         <td>${row.columns}</td>
+//       `;
+//       tbody.appendChild(tr);
+//     });
+//   }
+
+//   // Render comparison (first vs last floor)
+//   if (comparisonContent && floorRows.length >= 2) {
+//     const first = floorRows[0];
+//     const last = floorRows[floorRows.length - 1];
+//     const volumeDelta = ((last.volume - first.volume) / first.volume * 100).toFixed(1);
+//     const areaDelta = ((last.area - first.area) / first.area * 100).toFixed(1);
+
+//     comparisonContent.innerHTML = `
+//       <div><strong>${first.name}</strong> vs <strong>${last.name}</strong></div>
+//       <div>Volume: ${volumeDelta}% change</div>
+//       <div>Area: ${areaDelta}% change</div>
+//     `;
+//   }
+
+//   // Render bar chart
+//   if (chartBars && floorRows.length > 0) {
+//     const maxVolume = Math.max(...floorRows.map(r => r.volume));
+//     floorRows.forEach(row => {
+//       const bar = document.createElement('div');
+//       bar.className = 'chart-bar';
+//       const height = maxVolume > 0 ? (row.volume / maxVolume * 100) : 0;
+//       bar.style.height = `${height}%`;
+//       bar.title = `${row.name}: ${formatNumber(row.volume, 2)} m³`;
+//       chartBars.appendChild(bar);
+//     });
+//   }
+
+//   // Render heatmap
+//   if (heatmapGrid && floorRows.length > 0) {
+//     const maxVolume = Math.max(...floorRows.map(r => r.volume));
+//     floorRows.forEach(row => {
+//       const cell = document.createElement('div');
+//       cell.className = 'heatmap-cell';
+//       const intensity = maxVolume > 0 ? row.volume / maxVolume : 0;
+//       const opacity = Math.max(0.1, intensity);
+//       cell.style.backgroundColor = `rgba(0, 0, 0, ${opacity})`;
+//       cell.title = `${row.name}: ${formatNumber(row.volume, 2)} m³`;
+//       heatmapGrid.appendChild(cell);
+//     });
+//   }
+// }
+
+// async function computeFloorMetrics(storeys) {
+//   if (!storeys || !state.spatialRootCached) return [];
+
+//   const api = ifcLoader.ifcManager.ifcAPI;
+//   const floorRows = [];
+
+//   for (const storey of storeys) {
+//     try {
+//       const spatialNode = findSpatialNodeById(state.spatialRootCached, storey.expressID);
+//       if (!spatialNode) continue;
+
+//       const elementIds = collectSpatialElementIds(spatialNode);
+
+//       let totalArea = 0;
+//       let totalVolume = 0;
+//       let wallCount = 0;
+//       let doorCount = 0;
+//       let columnCount = 0;
+
+//       for (const id of elementIds) {
+//         try {
+//           // Count element types
+//           const line = api.GetLine(state.modelID, id);
+//           if (!line) continue;
+
+//           const type = line.type?.value || line.type;
+//           if (type === IFCWALL || type === IFCWALLSTANDARDCASE) wallCount++;
+//           else if (type === IFCDOOR) doorCount++;
+//           else if (type === IFCCOLUMN) columnCount++;
+
+//           // Extract quantities
+//           const psets = await ifcLoader.ifcManager.getPropertySets(state.modelID, id, true);
+//           const { totalArea: a, totalVolume: v } = extractQuantitiesFromPsets(psets);
+//           totalArea += a;
+//           totalVolume += v;
+//         } catch {
+//           // ignore individual element errors
+//         }
+//       }
+
+//       floorRows.push({
+//         name: storey.Name || `Floor ${storey.expressID}`,
+//         volume: totalVolume,
+//         area: totalArea,
+//         walls: wallCount,
+//         doors: doorCount,
+//         columns: columnCount
+//       });
+//     } catch {
+//       // ignore floor errors
+//     }
+//   }
+
+//   return floorRows;
+// }
+
+function collectMaterialNames(node, out) {
+  if (!node || typeof node !== 'object') return;
+  if (typeof node.Name?.value === 'string') out.push(node.Name.value);
+  if (typeof node.Name === 'string') out.push(node.Name);
+  for (const value of Object.values(node)) {
+    if (Array.isArray(value)) {
+      value.forEach((item) => collectMaterialNames(item, out));
+    } else if (value && typeof value === 'object') {
+      collectMaterialNames(value, out);
+    }
+  }
+}
+
+function extractQuantitiesFromPsets(psets) {
+  let totalArea = 0;
+  let totalVolume = 0;
+  let hits = 0;
+
+  const addQuantity = (qty) => {
+    const area = qty?.AreaValue?.value ?? qty?.AreaValue;
+    const volume = qty?.VolumeValue?.value ?? qty?.VolumeValue;
+    if (Number.isFinite(area)) {
+      totalArea += area;
+      hits += 1;
+    }
+    if (Number.isFinite(volume)) {
+      totalVolume += volume;
+      hits += 1;
+    }
+  };
+
+  for (const pset of psets || []) {
+    const name = pset?.Name?.value || pset?.Name || '';
+    const quantities = Array.isArray(pset?.Quantities) ? pset.Quantities : [];
+    if (name.toLowerCase().includes('qto') || name.toLowerCase().includes('quantity')) {
+      quantities.forEach(addQuantity);
+    } else if (quantities.length) {
+      quantities.forEach(addQuantity);
+    }
+  }
+
+  return { totalArea, totalVolume, hits };
+}
+
+async function computeModelSummary() {
+  if (state.modelID === null) return null;
+  const api = ifcLoader.ifcManager.ifcAPI;
+  const storeyIds = api.GetLineIDsWithType(state.modelID, IFCBUILDINGSTOREY);
+  const elementIds = await ifcLoader.ifcManager.getAllItemsOfType(state.modelID, IFCELEMENT, false);
+
+  let totalArea = 0;
+  let totalVolume = 0;
+  let quantityHits = 0;
+  const materialCounts = new Map();
+
+  for (const id of elementIds) {
+    try {
+      const psets = await ifcLoader.ifcManager.getPropertySets(state.modelID, id, true);
+      const { totalArea: a, totalVolume: v, hits } = extractQuantitiesFromPsets(psets);
+      totalArea += a;
+      totalVolume += v;
+      quantityHits += hits;
+    } catch {
+      // ignore missing property sets
+    }
+
+    try {
+      const mats = await ifcLoader.ifcManager.getMaterialsProperties(state.modelID, id, true);
+      const names = [];
+      collectMaterialNames(mats, names);
+      for (const raw of names) {
+        const name = String(raw || '').trim();
+        if (!name) continue;
+        materialCounts.set(name, (materialCounts.get(name) || 0) + 1);
+      }
+    } catch {
+      // ignore missing material data
+    }
+  }
+
+  let topMaterial = 'n/a';
+  let topMaterialCount = 0;
+  for (const [name, count] of materialCounts.entries()) {
+    if (count > topMaterialCount) {
+      topMaterial = name;
+      topMaterialCount = count;
+    }
+  }
+
+  return {
+    storeys: storeyIds.size(),
+    elements: elementIds.length,
+    totalArea,
+    totalVolume,
+    quantityHits,
+    topMaterial,
+    topMaterialCount
+  };
+}
 
 // ══════════════════════════════════════════════════════════════════════
 // EVENT LISTENERS
@@ -351,6 +658,29 @@ dom.btnLoad.addEventListener('click', async () => {
     await rebuildSpatialStructureCache();
 
     const summary = await listBasicStructure();
+    updateLoading('Calculating model summary...');
+    const modelSummary = await computeModelSummary();
+    if (modelSummary) {
+      const hasQuantities = modelSummary.quantityHits > 0;
+      const areaNote = hasQuantities ? null : 'No Qto quantities found in this IFC.';
+      const volumeNote = hasQuantities ? null : 'No Qto quantities found in this IFC.';
+      renderSummaryPanel({
+        subtitle: 'Calculated from IFC properties and materials.',
+        items: [
+          { label: 'Storeys', value: formatNumber(modelSummary.storeys, 0) },
+          { label: 'Elements', value: formatNumber(modelSummary.elements, 0) },
+          { label: 'Total Volume (m³)', value: formatNumber(modelSummary.totalVolume, 2), note: volumeNote },
+          { label: 'Total Area (m²)', value: formatNumber(modelSummary.totalArea, 2), note: areaNote },
+          {
+            label: 'Top Material',
+            value: modelSummary.topMaterial,
+            note: modelSummary.topMaterialCount ? `Used by ${modelSummary.topMaterialCount} elements` : 'No material data found.'
+          }
+        ].filter(Boolean)
+      });
+    } else {
+      resetSummaryPanel();
+    }
     // Populate rooms list (IfcSpace)
     const api = ifcLoader.ifcManager.ifcAPI;
     const ids = api.GetLineIDsWithType(state.modelID, IFCSPACE);
@@ -427,6 +757,20 @@ dom.btnLoad.addEventListener('click', async () => {
     rebuildDebugLevelsOverlay();
     rebuildIfcGridOverlay();
 
+    // ── Discover and display IFC categories ──
+    updateLoading('Discovering categories...');
+    discoverCategories();
+    populateCategoryUI();
+
+    // Compute and render floor metrics
+    // updateLoading('Computing floor metrics...');
+    // const floorRows = await computeFloorMetrics(storeys);
+    // if (floorRows && floorRows.length > 0) {
+    //   renderFloorPanel(floorRows);
+    // } else {
+    //   resetFloorPanel();
+    // }
+
     // Register dblclick after renderer is ready
     state.renderer.domElement.addEventListener('dblclick', onDoubleClick);
 
@@ -479,10 +823,12 @@ dom.btnClose.addEventListener('click', () => {
     state.modelBoxCached = null;
     populateSpacesDropdown([]);
     populateStoreysDropdown([]);
+    clearCategoryUI();
     dom.viewerMeta.textContent = 'No model loaded';
     toast('Model closed', 'info');
     setEnabled(false);
     setOutput('Waiting for IFC file...');
+    resetSummaryPanel();
   }
 });
 
@@ -611,6 +957,18 @@ dom.btnExportCSV.addEventListener('click', () => {
   exportRoomCSV();
 });
 
+// ── Category visibility buttons ─────────────────────────────────────
+
+dom.btnShowAllCat.addEventListener('click', () => {
+  if (state.modelID === null) return;
+  showAllCategories();
+});
+
+dom.btnHideAllCat.addEventListener('click', () => {
+  if (state.modelID === null) return;
+  hideAllCategories();
+});
+
 // ── Metadata file ───────────────────────────────────────────────────
 
 dom.metadataFile.addEventListener('change', (e) => {
@@ -661,7 +1019,7 @@ if (languageButton) {
     const currentLang = getCurrentLanguage();
     const newLang = currentLang === 'en' ? 'th' : 'en';
     setLanguage(newLang);
-    
+
     // Update dynamically generated content
     updateDynamicContent();
   });
@@ -670,17 +1028,17 @@ if (languageButton) {
 // Function to update dynamically generated content
 function updateDynamicContent() {
   const currentLang = getCurrentLanguage();
-  
+
   // Update viewer meta if no model is loaded
   if (dom.viewerMeta && (dom.viewerMeta.textContent.includes('No model') || dom.viewerMeta.textContent.includes('ไม่มีโมเดล'))) {
     dom.viewerMeta.textContent = currentLang === 'en' ? 'No model loaded' : 'ไม่มีโมเดลที่โหลด';
   }
-  
+
   // Update output if waiting for file
   if (dom.output && (dom.output.textContent.includes('Waiting for IFC') || dom.output.textContent.includes('รอการโหลดไฟล์ IFC'))) {
     dom.output.textContent = currentLang === 'en' ? 'Waiting for IFC file...' : 'รอการโหลดไฟล์ IFC...';
   }
-  
+
   // Update load hint if needed
   if (dom.loadHint && (dom.loadHint.textContent.includes('Select an .ifc') || dom.loadHint.textContent.includes('เลือกไฟล์ .ifc'))) {
     dom.loadHint.textContent = currentLang === 'en' ? 'Select an .ifc file to start.' : 'เลือกไฟล์ .ifc เพื่อเริ่มต้น';

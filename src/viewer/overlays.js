@@ -270,6 +270,14 @@ export function buildEdgesOverlay(object3d) {
   clearEdges();
   if (!object3d) return;
 
+  // Count meshes first — skip edge generation for very large models
+  let meshCount = 0;
+  object3d.traverse((obj) => { if (obj?.isMesh) meshCount++; });
+  if (meshCount > 500) {
+    console.log(`[buildEdgesOverlay] Skipped: model has ${meshCount} meshes (limit 500)`);
+    return;
+  }
+
   state.edgesGroup = new THREE.Group();
   state.edgesGroup.renderOrder = 10;
 
@@ -282,11 +290,12 @@ export function buildEdgesOverlay(object3d) {
   object3d.traverse((obj) => {
     if (!obj || !obj.isMesh || !obj.geometry) return;
     const geom = obj.geometry;
-    const edges = new THREE.EdgesGeometry(geom, 25);
+    // Use higher angle threshold (35°) to produce fewer edge lines
+    const edges = new THREE.EdgesGeometry(geom, 35);
     const lines = new THREE.LineSegments(edges, state.edgesMaterial);
     lines.matrixAutoUpdate = false;
     lines.matrix.copy(obj.matrixWorld);
-    lines.frustumCulled = false;
+    lines.frustumCulled = true;
     state.edgesGroup.add(lines);
   });
 
@@ -297,9 +306,11 @@ export function buildEdgesOverlay(object3d) {
 
 export function setShadowForModel(object3d) {
   if (!object3d) return;
+  // Only receiveShadow — castShadow on every mesh forces a full scene
+  // re-render into the shadow map each frame, which is very expensive.
   object3d.traverse((obj) => {
     if (!obj || !obj.isMesh) return;
-    obj.castShadow = true;
+    obj.castShadow = false;
     obj.receiveShadow = true;
   });
 }
@@ -331,38 +342,16 @@ export function setModelAppearance(object3d) {
     if (!obj || !obj.isMesh) return;
     const m = obj.material;
     if (!m) return;
-    if (Array.isArray(m)) {
-      for (const mi of m) {
-        if (!mi) continue;
-        if (mi.side !== THREE.DoubleSide) mi.side = THREE.DoubleSide;
-        if (mi.color && mi.color.isColor) mi.color.setHex(0xf2f2ef);
-        // Enable clipping planes support - must be done for each material type
-        mi.clippingPlanes = state.sectionPlanes || [];
-        mi.clipIntersection = false;
-        // Force clipping to work even with custom shaders
-        if (mi.onBeforeCompile) {
-          const originalCompile = mi.onBeforeCompile;
-          mi.onBeforeCompile = function (shader) {
-            originalCompile.call(this, shader);
-          };
-        }
-        mi.needsUpdate = true;
-      }
-    }
-    else {
-      if (m.side !== THREE.DoubleSide) m.side = THREE.DoubleSide;
-      if (m.color && m.color.isColor) m.color.setHex(0xf2f2ef);
-      // Enable clipping planes support - must be done for each material type
-      m.clippingPlanes = state.sectionPlanes || [];
-      m.clipIntersection = false;
-      // Force clipping to work even with custom shaders
-      if (m.onBeforeCompile) {
-        const originalCompile = m.onBeforeCompile;
-        m.onBeforeCompile = function (shader) {
-          originalCompile.call(this, shader);
-        };
-      }
-      m.needsUpdate = true;
+    const materials = Array.isArray(m) ? m : [m];
+    for (const mi of materials) {
+      if (!mi) continue;
+      // Ensure double-sided rendering for IFC geometry
+      if (mi.side !== THREE.DoubleSide) mi.side = THREE.DoubleSide;
+      // Preserve original IFC colors and textures — do NOT override color
+      // Enable clipping planes support
+      mi.clippingPlanes = state.sectionPlanes || [];
+      mi.clipIntersection = false;
+      mi.needsUpdate = true;
     }
   });
 }

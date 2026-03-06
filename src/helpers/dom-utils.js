@@ -76,4 +76,6 @@ export function setEnabled(enabled) {
   dom.btnSectionReset.disabled = !enabled;
   if (dom.btnExportJSON) dom.btnExportJSON.disabled = !enabled;
   if (dom.btnExportCSV) dom.btnExportCSV.disabled = !enabled;
+  if (dom.btnShowAllCat) dom.btnShowAllCat.disabled = !enabled;
+  if (dom.btnHideAllCat) dom.btnHideAllCat.disabled = !enabled;
 }

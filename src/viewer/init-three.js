@@ -24,8 +24,7 @@ export function initThree() {
   state.renderer = new THREE.WebGLRenderer({ antialias: true });
   state.renderer.setSize(w, h);
   state.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  state.renderer.shadowMap.enabled = true;
-  state.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  state.renderer.shadowMap.enabled = false;
   state.renderer.localClippingEnabled = false;
   dom.viewer3d.innerHTML = '';
   dom.viewer3d.appendChild(state.renderer.domElement);
@@ -39,10 +38,7 @@ export function initThree() {
   state.scene.add(ambient);
   const dir = new THREE.DirectionalLight(0xffffff, 1.15);
   dir.position.set(10, 20, 10);
-  dir.castShadow = true;
-  dir.shadow.mapSize.width = 2048;
-  dir.shadow.mapSize.height = 2048;
-  dir.shadow.bias = -0.0001;
+  dir.castShadow = false;
   state.scene.add(dir);
 
   ensureShadowPlane();
@@ -104,28 +100,11 @@ export function initThree() {
     requestAnimationFrame(animate);
     state.controls.update();
 
-    // Ensure clipping is enabled before render
+    // Toggle clipping flag — materials already have planes set by section-box.js
     if (state.sectionPlanes && state.sectionPlanes.length > 0) {
       state.renderer.localClippingEnabled = true;
-      state.renderer.clippingPlanes = state.sectionPlanes;
-
-      // Update all materials with clipping planes
-      if (state.ifcModel) {
-        state.ifcModel.traverse((obj) => {
-          if (!obj?.isMesh || !obj.material) return;
-          const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
-          for (const m of materials) {
-            if (m && !m.clippingPlanes) {
-              m.clippingPlanes = state.sectionPlanes;
-              m.clipIntersection = false;
-              m.needsUpdate = true;
-            }
-          }
-        });
-      }
     } else {
       state.renderer.localClippingEnabled = false;
-      state.renderer.clippingPlanes = [];
     }
 
     state.renderer.render(state.scene, state.camera);
